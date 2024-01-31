@@ -1,0 +1,61 @@
+.tableheader{
+    background-color: rgb(174, 209, 235);
+    border-right: 1px solid white;
+}
+.items{
+    padding-right: 50px;
+}
+.percentplus{
+    text-align: center;
+    width: 50px;
+}
+.container-fluid{
+  text-align: center;
+}
+.lableheader{
+  margin-top: 15px;
+  font-weight: 500;
+}
+.navbar {
+    background-color: whitesmoke;
+   align-items: center;
+    box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.1); 
+    width: 100%;
+    z-index: 1000;
+    padding-top: 5px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+  }
+  .btn-custom {
+    background-color:  rgb(174, 209, 235); 
+    color: #0b0b0b; 
+    border-color:  rgb(174, 209, 235); 
+    margin: 2px;
+  }
+  
+.btn-custom:active {
+    background-color: #a5aaee; 
+      border-color:  #fff;
+}
+
+.buttonitem{
+  margin-left: 400px;
+}
+.mybox{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 400px;
+  margin: 0px 0px 10px 400px;
+}
+.myrefund{
+  display: flex;
+  margin: 0px 0px 10px 400px;
+}
+.mydiscount{
+  display: flex;
+  margin: 0px 0px 10px 400px;
+}
+
+ 

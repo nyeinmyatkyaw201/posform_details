@@ -1,0 +1,11 @@
+.matbut{
+    background-color:  rgb(174, 209, 235); 
+    color: #0b0b0b; 
+    border-color:  rgb(174, 209, 235); 
+    margin: 2px;
+}
+
+.btn-custom:active {
+    background-color: #a5aaee; 
+      border-color:  #fff;
+}

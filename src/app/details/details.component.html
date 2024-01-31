@@ -1,0 +1,413 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <div class="navbar-brand"></div>
+    <h2 class="lableheader">Stock Template</h2>
+    <div class="collapse navbar-collapse d-flex justify-content-center">
+      <button class="btn navbtn btn-custom nav-items" (click)="newTemplate()">
+        <i class="fa fa-plus p-1" aria-hidden="true"></i>New
+      </button>
+      <button class="btn navbtn btn-custom nav-items" (click)="saveData()">
+        <i class="fa fa-floppy-o p-1" aria-hidden="true"></i>Save
+      </button>
+      <button class="btn navbtn btn-custom nav-items" (click)="onDeleteClick()">
+        <i class="fa fa-trash-o p-1" aria-hidden="true"></i>Delete
+      </button>
+      <button
+        class="btn navbtn btn-custom nav-items"
+        (click)="exportToExcel([order], 'order')"
+      >
+        <i class="fa fa-share-square-o" aria-hidden="true"></i> Export
+      </button>
+      <button class="btn navbtn btn-custom nav-items" (click)="openFileInput()">
+        <i class="fa fa-download" aria-hidden="true"></i> Import
+        <input
+          type="file"
+          (change)="onFileChange($event)"
+          #fileInput
+          style="display: none"
+        />
+      </button>
+      <button class="btn navbtn btn-custom nav-items" (click)="gotoPosform()">
+        <i class="fa fa-list p-1" aria-hidden="true"></i>List
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid">
+  <form>
+    <table>
+      <tr>
+        <td align="start">
+          <label for="orderId" class="form-label"><h3>Order Id</h3></label>
+        </td>
+        <td class="mybox">
+          <input
+            type="number"
+            id="orderId"
+            name="orderId"
+            class="form-control"
+            [disabled]="myorder_id !==null"
+            [(ngModel)]="order.order_id"
+          />
+        </td>
+      </tr>
+
+      <tr>
+        <td align="start">
+          <label for="counterNo" class="form-label"><h3>Counter No</h3></label>
+        </td>
+        <td class="mybox">
+          <input
+            type="number"
+            id="counterNo"
+            name="counterNo"
+            required
+            class="form-control"
+            min="0"
+            [disabled]="myorder_id !== null"
+            [(ngModel)]="order.counter_no"
+          />
+        </td>
+      </tr>
+
+      <tr>
+        <td align="start">
+          <label for="cashierName" class="form-label"
+            ><h3>Cashier Name</h3></label
+          >
+        </td>
+        <td class="mybox">
+          <input
+            type="text"
+            id="cashierName"
+            name="cashierName"
+            [disabled]="myorder_id !== null"
+            [(ngModel)]="order.casher_name"
+            minlength="5"
+            class="form-control"
+          />
+        </td>
+      </tr>
+
+      <tr>
+        <td align="start">
+          <label for="orderDate" class="form-label"><h3>Order Date</h3></label>
+        </td>
+        <td class="mybox">
+          <input
+            type="date"
+            id="orderDate"
+            name="orderDate"
+            [disabled]="myorder_id !== null"
+            [(ngModel)]="order.order_date"
+            class="form-control"
+          />
+        </td>
+      </tr>
+
+      <tr *ngIf="myorder_id == null || myorder_id == undefined">
+        <td align="start"><h3>Refund</h3></td>
+        <td class="myrefund">
+          <input
+            type="radio"
+            id="refundYes"
+            name="refund"
+            value="Refund"
+            class="form-check-input"
+            [ngModel]="order.refund"
+            (change)="toogleRefundYes()"
+          />
+          <label class="form-check-label" for="refundYes">Yes</label>
+
+          <input
+            type="radio"
+            id="refundNo"
+            name="refund"
+            value="NotRefund"
+            class="form-check-input"
+            [ngModel]="order.refund"
+            (change)="toogleRefundNo()"
+          />
+          <label class="form-check-label" for="refundNo">No</label>
+        </td>
+      </tr>
+
+      <tr *ngIf="myorder_id == null || myorder_id == undefined">
+        <td align="start">
+          <label class="form-check-label" for="discount"
+            ><h3>Discount</h3></label
+          >
+        </td>
+        <td class="mydiscount">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="discount"
+            name="discount"
+            [(ngModel)]="order.discount"
+            (change)="clearPercentage()"
+          />
+        </td>
+      </tr>
+
+      <tr *ngIf="myorder_id == null || myorder_id == undefined">
+        <td align="start">
+          <label for="discount_percentage"><h3>Discount Percentage</h3></label>
+        </td>
+        <td class="mybox">
+          <input
+            type="number"
+            id="discount_percentage"
+            name="discount_percentage"
+            class="form-control"
+            [(ngModel)]="order.discount_percentage"
+            [disabled]="!order.discount"
+          />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<table class="table table-striped mt-3">
+  <thead>
+    <tr>
+      <th class="tableheader">Items</th>
+      <th class="tableheader">Price</th>
+      <th class="tableheader">Quantity</th>
+      <th class="tableheader">Amount</th>
+      <th class="tableheader">
+        <!-- <i class="fa fa-percent" aria-hidden="true"></i> -->
+        Discount Percentage
+      </th>
+      <th class="tableheader">Discount Amount</th>
+      <th class="tableheader">Sub Total</th>
+      <th class="tableheader">Rechange</th>
+      <th
+        type="button"
+        scope="col"
+        class="tableheader percentplus"
+        (click)="addRow()"
+      >
+        <i class="fa fa-plus" aria-hidden="true"></i>
+      </th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let row of rows" id="tbody">
+    <tr>
+      <td>
+        <div class="input-group-sm">
+          <select
+            class="form-select"
+            id="inputGroupSelect02"
+            [(ngModel)]="row.item"
+          >
+            <option *ngFor="let s of stocks" [value]="s">
+              {{ row.item }}
+            </option>
+          </select>
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="price"
+            name="price"
+            class="form-control"
+            [(ngModel)]="row.price"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            class="form-control"
+            [(ngModel)]="row.quantity"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            class="form-control"
+            [ngModel]="row.amount"
+            disabled
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="discount_percentage"
+            name="discount_percentage"
+            class="form-control"
+            [(ngModel)]="row.discount_percentage"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="discount_amount"
+            name="discount_amount"
+            class="form-control"
+            [ngModel]="row.discount_amount"
+            disabled
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="sub_total"
+            name="sub_total"
+            class="form-control"
+            [ngModel]="row.sub_total"
+            disabled
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="text"
+            id="rechange"
+            name="rechange"
+            class="form-control"
+            [(ngModel)]="row.rechange"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <button class="btn btn-custom" (click)="deleteStock(row.id)">
+            <i class="fa fa-trash-o p-1" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tbody *ngFor="let inputdata of inputdatas ; let i = index" id="tbody">
+    <tr>
+      <td>
+        <div class="input-group-sm">
+          <select
+            class="form-select"
+            id="inputGroupSelect02"
+            [(ngModel)]="inputdata.item"
+            (ngModelChange)="updateCalculations()"
+          >
+            <option *ngFor="let s of stocks" [value]="s">
+              {{ s }}
+            </option>
+          </select>
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="price"
+            name="price"
+            class="form-control"
+            [(ngModel)]="inputdata.price"
+            (ngModelChange)="updateCalculations()"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            class="form-control"
+            [(ngModel)]="inputdata.quantity"
+            (ngModelChange)="updateCalculations()"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            class="form-control"
+            [ngModel]="inputdata.amount"
+            disabled
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="discount_percentage"
+            name="discount_percentage"
+            class="form-control"
+            [(ngModel)]="inputdata.discount_percentage"
+            (ngModelChange)="updateCalculations()"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="discount_amount"
+            name="discount_amount"
+            class="form-control"
+            [ngModel]="inputdata.discount_amount"
+            disabled
+            
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <input
+            type="number"
+            id="sub_total"
+            name="sub_total"
+            class="form-control"
+            [ngModel]="inputdata.sub_total"
+            disabled
+            (ngModelChange)="updateCalculations()"
+          />
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <select
+            class="form-select"
+            id="inputGroupSelect02"
+            [(ngModel)]="inputdata.rechange"
+            (ngModelChange)="updateCalculations()"
+          >
+            <option *ngFor="let myRechange of myRechanges" [value]="myRechange">
+              {{ myRechange }}
+            </option>
+          </select>
+        </div>
+      </td>
+      <td>
+        <div class="input-group-sm">
+          <button class="btn btn-custom" (click)="removeRow(i)">
+            <i class="fa fa-trash-o p-1" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
