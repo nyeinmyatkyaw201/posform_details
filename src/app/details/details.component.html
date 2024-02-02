@@ -193,7 +193,7 @@
       </th>
     </tr>
   </thead>
-  <tbody *ngFor="let row of rows" id="tbody">
+  <!-- <tbody *ngFor="let row of rows; let i = index" id="tbody">
     <tr>
       <td>
         <div class="input-group-sm">
@@ -290,13 +290,13 @@
       </td>
       <td>
         <div class="input-group-sm">
-          <button class="btn btn-custom" (click)="deleteStock(row.id)">
+          <button class="btn btn-custom" (click)="removeRow(i)">
             <i class="fa fa-trash-o p-1" aria-hidden="true"></i>
           </button>
         </div>
       </td>
     </tr>
-  </tbody>
+  </tbody> -->
   <tbody *ngFor="let inputdata of inputdatas ; let i = index" id="tbody">
     <tr>
       <td>

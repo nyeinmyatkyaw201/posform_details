@@ -56,7 +56,9 @@ export class ApiService {
   create(data:any){
     return this.http.post('http://localhost:3000/api/v1/posformstock/create', data)
   }
-
+  getStocks(id :any){
+    return this.http.get(`http://localhost:3000/api/v1/stock/${id}`)
+  }
   getAllStock(){
     return this.http.get("http://localhost:3000/api/v1/stock")
   }

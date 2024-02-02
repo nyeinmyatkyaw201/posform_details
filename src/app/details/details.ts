@@ -1,4 +1,5 @@
 export class FormDataModel {
+    id?: number;
     item!: string;
     price!: number;
     quantity!: number;

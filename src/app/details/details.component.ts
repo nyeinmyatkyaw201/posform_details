@@ -35,7 +35,8 @@ export class DetailsComponent implements OnInit {
   myRechanges: any[] = ['Yes', 'No'];
 
   selectedItems: string[] = [];
-  rows: any[] = [];
+  rows: FormDataModel[] = [];
+  mydatas: any = [];
 
   addRow() {
     const newFormData: FormDataModel = new FormDataModel();
@@ -56,11 +57,13 @@ export class DetailsComponent implements OnInit {
   }
   ngOnInit(): void {
     this.myorder_id = this.api.getOrderId();
+
     if (this.myorder_id !== null) {
       this.getOrderStock();
-      this.getallStock();
+      this.getStocks();
     }
     this.loadDataFromStorage();
+    this.getallStock();
     console.log(this.inputdatas, 'inputdata');
   }
 
@@ -105,6 +108,7 @@ export class DetailsComponent implements OnInit {
     this.inputdatas = [];
     this.order = [];
     this.rows = [];
+    this.getallStock();
     this.myroute.navigate(['/detail'], { replaceUrl: true });
   }
 
@@ -215,10 +219,7 @@ export class DetailsComponent implements OnInit {
           .subscribe({
             next: (res: any) => {
               console.log(res, 'response');
-              const key = `formData_${this.myorder_id}`;
-
-              // Remove the item with the specified key from local storage
-              localStorage.removeItem(key);
+              this.getallStock();
               resolve(res);
             },
             error: (err: any) => {
@@ -242,28 +243,6 @@ export class DetailsComponent implements OnInit {
       alert('All operations completed successfully.');
     }
   }
-
-  // async processFunction() {
-  //   console.log(this.rows)
-  //   if ( this.rows.length > 0) {
-
-  //     await this.getAndDelete();
-  //   }
-  //     await this.saveAllStock();
-
-  // }
-  // async getAndDelete() {
-  //   await this.api.getAndDelete(this.myorder_id).subscribe({
-  //     next: (res: any) => {
-  //       console.log(res, 'response');
-  //       alert(`${res.message}`);
-  //     },
-  //     error: (err: any) => {
-  //       console.log(err.error);
-  //       alert(err.error.message);
-  //     },
-  //   });
-  // }
 
   async saveAllStock() {
     await this.api
@@ -382,7 +361,41 @@ export class DetailsComponent implements OnInit {
       },
     });
   }
+  async getStocks() {
+    await this.api.getStocks(this.myorder_id).subscribe({
+      next: (res: any) => {
+        console.log(res, 'response');
 
+        this.mydatas = res.stock.map((item: any) => ({
+          ...item,
+          rechange: item.rechange ? 'Yes' : 'No',
+        }));
+        console.log(this.mydatas)
+
+        for (let row of this.mydatas) {
+          // Check if the item already exists in inputdatas
+          const exists = this.inputdatas.some(
+            (existingRow) => existingRow.id === row.id
+          ); // replace 'someKey' with the actual key you want to compare
+
+          if (!exists) {
+            this.inputdatas.push(row);
+           
+          }
+
+          const key = `formData_${this.myorder_id}`;
+
+          localStorage.setItem(key, JSON.stringify(this.inputdatas));
+          this.loadDataFromStorage();
+        }
+
+        console.log(this.inputdatas, 'input');
+      },
+      error: (err: any) => {
+        console.log(err);
+      },
+    });
+  }
   async getallStock() {
     await this.api.getAllStock().subscribe({
       next: (res: any) => {
@@ -546,19 +559,32 @@ export class DetailsComponent implements OnInit {
       //     sub_total: entry['sub_total'],
       //   })),
       // };
-      console.log(transformed_data);
+
+      transformed_data.forEach((item) => {
+        const formData = new FormDataModel();
+        formData.item = item.stock.item;
+        formData.price = item.stock.price;
+        formData.quantity = item.stock.quantity;
+        formData.amount = item.stock.amount;
+        formData.discount_percentage = item.stock.discount_percentage;
+        formData.discount_amount = item.stock.discount_amount;
+        formData.sub_total = item.stock.sub_total;
+        formData.rechange = item.stock.rechange ? 'true' : 'false';
+        formData.order_id = item.order_id;
+
+        // this.inputdatas.push(formData)
+      });
+      // Save to localStorage
 
       this.combinedFunction(orderIds, transformed_data);
-      // this.api.saveOrderStock(transformed_data).subscribe({
-      //   next: (res: any) => {
-      //     console.log(res, 'response');
-      //     alert(res.message);
-      //   },
-      //   error: (err: any) => {
-      //     console.log(err.error);
-      //     alert(err.error.message);
-      //   },
-      // });
+      console.log(this.inputdatas);
+      for(let id of orderIds){
+        const keyToRemove = `formData_${id}`;
+      localStorage.removeItem(keyToRemove);
+      this.loadDataFromStorage()
+      }
+      
+      this.newTemplate();
     };
 
     reader.readAsBinaryString(file);
@@ -571,7 +597,7 @@ export class DetailsComponent implements OnInit {
     try {
       await this.processGetAndDeleteOperations(idarray);
       await this.processSaveOrderStock(data);
-  
+
       console.log('All operations completed successfully.');
     } catch (error) {
       console.error(error);
@@ -583,7 +609,10 @@ export class DetailsComponent implements OnInit {
     const processedOrderIds = new Set();
     for (const orderId of idarray) {
       // Check if the orderId is already processed
-      if (!processedOrderIds.has(orderId) && this.orderIDarray.includes(orderId)) {
+      if (
+        !processedOrderIds.has(orderId) &&
+        this.orderIDarray.includes(orderId)
+      ) {
         try {
           const res = await new Promise((resolve, reject) => {
             this.api.getAndDelete(orderId).subscribe({
@@ -601,18 +630,20 @@ export class DetailsComponent implements OnInit {
             });
           });
           // Process res if needed
-    
+
           // Add orderId to the set to mark it as processed
           processedOrderIds.add(orderId);
         } catch (error) {
           // Handle errors for getAndDelete operation
           console.error(error);
-          throw new Error(`getAndDelete operation failed for orderId: ${orderId}`);
+          throw new Error(
+            `getAndDelete operation failed for orderId: ${orderId}`
+          );
         }
       }
     }
   }
-  
+
   private async processSaveOrderStock(data: any) {
     try {
       const res = await new Promise((resolve, reject) => {
@@ -620,6 +651,8 @@ export class DetailsComponent implements OnInit {
           next: (response: any) => {
             console.log(response, 'response');
             alert(response.message);
+            this.myroute.navigate(['/posform']);
+
             resolve(response);
           },
           error: (err: any) => {
@@ -629,17 +662,14 @@ export class DetailsComponent implements OnInit {
           },
         });
       });
-  
+
       // Process res if needed
-  
     } catch (error) {
       // Handle errors for saveOrderStock operation
       console.error(error);
       throw new Error('saveOrderStock operation failed');
     }
   }
-
-
 
   // async combinedFunction(idarray: any, data: any) {
   //   try {
