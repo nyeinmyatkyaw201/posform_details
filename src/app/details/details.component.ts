@@ -185,6 +185,7 @@ export class DetailsComponent implements OnInit {
   async processFunction() {
     let successMessageShown = false;
 
+
     try {
       console.log(this.rows);
 
@@ -219,6 +220,9 @@ export class DetailsComponent implements OnInit {
           .subscribe({
             next: (res: any) => {
               console.log(res, 'response');
+              const keyToRemove = `formData_${this.myorder_id}`;
+              localStorage.removeItem(keyToRemove);
+              this.loadDataFromStorage()
               this.getallStock();
               resolve(res);
             },
@@ -244,30 +248,30 @@ export class DetailsComponent implements OnInit {
     }
   }
 
-  async saveAllStock() {
-    await this.api
-      .saveAllStock(
-        this.inputdatas.map((item) => ({
-          ...item,
-          rechange: item.rechange === 'Yes' ? true : false,
-          order_id: (item.order_id = this.myorder_id),
-        }))
-      )
-      .subscribe({
-        next: (res: any) => {
-          console.log(res, 'response');
-          const key = `formData_${this.myorder_id}`;
+  // async saveAllStock() {
+  //   await this.api
+  //     .saveAllStock(
+  //       this.inputdatas.map((item) => ({
+  //         ...item,
+  //         rechange: item.rechange === 'Yes' ? true : false,
+  //         order_id: (item.order_id = this.myorder_id),
+  //       }))
+  //     )
+  //     .subscribe({
+  //       next: (res: any) => {
+  //         console.log(res, 'response');
+  //         const key = `formData_${this.myorder_id}`;
 
-          // Remove the item with the specified key from local storage
-          localStorage.removeItem(key);
-          alert(`${res.message}`);
-        },
-        error: (err: any) => {
-          console.log(err.error);
-          alert(err.error.message);
-        },
-      });
-  }
+  //         // Remove the item with the specified key from local storage
+  //         localStorage.removeItem(key);
+  //         alert(`${res.message}`);
+  //       },
+  //       error: (err: any) => {
+  //         console.log(err.error);
+  //         alert(err.error.message);
+  //       },
+  //     });
+  // }
   // fpr excelImport
   async saveOrderStock() {
     const orderData = {
