@@ -76,12 +76,7 @@ export class DetailsComponent implements OnInit {
       }
     }
   }
-  toogleRefundNo() {
-    this.order.refund = false;
-  }
-  toogleRefundYes() {
-    this.order.refund = true;
-  }
+
   clearPercentage() {
     if (this.order.discount == false) {
       this.order.discount_percentage = 0;

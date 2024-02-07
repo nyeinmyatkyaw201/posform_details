@@ -114,8 +114,9 @@
             name="refund"
             value="Refund"
             class="form-check-input"
-            [ngModel]="order.refund"
-            (change)="toogleRefundYes()"
+            [(ngModel)]="order.refund"
+            [value]="true"
+           
           />
           <label class="form-check-label" for="refundYes">Yes</label>
 
@@ -125,8 +126,9 @@
             name="refund"
             value="NotRefund"
             class="form-check-input"
-            [ngModel]="order.refund"
-            (change)="toogleRefundNo()"
+            [(ngModel)]="order.refund"
+            [value]="false"
+          
           />
           <label class="form-check-label" for="refundNo">No</label>
         </td>
